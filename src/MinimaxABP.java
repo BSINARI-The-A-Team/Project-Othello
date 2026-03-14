@@ -10,11 +10,11 @@ public class MinimaxABP implements IOthelloAI{
 
     public Position ALPHA_BETA_SEARCH(GameState state){
         System.out.println("Initiating Search");
-        Position position = MAX_VALUE(state).move();
+        Position position = MAX_VALUE(state, Integer.MAX_VALUE, Integer.MIN_VALUE).move();
         return position;
     }
 
-    public MoveValue MAX_VALUE(GameState state) {
+    public MoveValue MAX_VALUE(GameState state, int a, int b) {
         System.out.println("Max Value");
         if (IS_TERMINAL(state)) {
             return new MoveValue(UTILITY(state), null);
@@ -24,22 +24,24 @@ public class MinimaxABP implements IOthelloAI{
             // No moves available, pass the turn to opponent
             GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
             passed.changePlayer();
-            return MIN_VALUE(passed);
+            return MIN_VALUE(passed, a, b);
         }
         int v = Integer.MIN_VALUE;
         Position move = null;
         for (Position position : ACTIONS(state)) {
-            MoveValue minValue = MIN_VALUE(RESULT(state, position));
+            MoveValue minValue = MIN_VALUE(RESULT(state, position), a, b);
             int v2 = minValue.utilityValue();
             if (v2 > v) {
                 v = v2;
                 move = position;
+                a = Max(a, v);
             }
+            if (v >= b) return new MoveValue(v,move);
         }
         return new MoveValue(v, move);
     }
 
-    public MoveValue MIN_VALUE(GameState state) {
+    public MoveValue MIN_VALUE(GameState state, int a, int b) {
         System.out.println("Min Value");
         if (IS_TERMINAL(state)) {
             return new MoveValue(UTILITY(state), null);
@@ -49,17 +51,19 @@ public class MinimaxABP implements IOthelloAI{
             // No moves available, pass the turn to opponent
             GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
             passed.changePlayer();
-            return MAX_VALUE(passed);
+            return MAX_VALUE(passed, a, b);
         }
         int v = Integer.MAX_VALUE;
         Position move = null;
         for (Position position : ACTIONS(state)) {
-            MoveValue maxValue = MAX_VALUE(RESULT(state, position));
+            MoveValue maxValue = MAX_VALUE(RESULT(state, position), a, b);
             int v2 = maxValue.utilityValue();
             if (v2 < v) {
                 v = v2;
                 move = position;
+                b = Min(b, v);
             }
+            if (v <= a) return new MoveValue(v, move);
         }
         return new MoveValue(v, move);
     }
