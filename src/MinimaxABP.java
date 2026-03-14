@@ -93,6 +93,16 @@ public class MinimaxABP implements IOthelloAI{
             return null;
         }
     }
+
+    public int Max(int x, int y){
+        if (x > y) return x;
+        else return y;
+    }
+
+    public int Min(int x, int y){
+        if (x < y) return x;
+        else return y;
+    }
 }
 
 /*
