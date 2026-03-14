@@ -4,42 +4,52 @@ record MoveValue(int utilityValue, Position move) {}
 
 public class MinimaxABP implements IOthelloAI{
 
-	public Position decideMove(GameState s){
-		/**
-         * Add MinimaxABP functions here
-         * when they are done
-         */
-        return new Position(-1,-1); // placeholder return value
+	public Position decideMove(GameState state){
+		return ALPHA_BETA_SEARCH(state);
 	}
 
     public Position ALPHA_BETA_SEARCH(GameState state){
-        /*
-        player←game.TO-MOVE(state)
-        value, move←MAX-VALUE(state, state,−∞,+∞)
-        */
-        return new Position(-1,-1); // placeholder return value
+        System.out.println("Initiating Search");
+        Position position = MAX_VALUE(state).move();
+        return position;
     }
 
     public MoveValue MAX_VALUE(GameState state) {
-    if (IS_TERMINAL(state)) {
-        return new MoveValue(UTILITY(state), null);
-    }
-    int v = Integer.MIN_VALUE;
-    Position move = null;
-    for (Position position : ACTIONS(state)) {
-        MoveValue minValue = MIN_VALUE(RESULT(state, position));
-        int v2 = minValue.utilityValue();
-        if (v2 > v) {
-            v = v2;
-            move = position;
+        System.out.println("Max Value");
+        if (IS_TERMINAL(state)) {
+            return new MoveValue(UTILITY(state), null);
+        }
+        ArrayList<Position> actions = ACTIONS(state);
+        if (actions.isEmpty()) {
+            // No moves available, pass the turn to opponent
+            GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
+            passed.changePlayer();
+            return MIN_VALUE(passed);
+        }
+        int v = Integer.MIN_VALUE;
+        Position move = null;
+        for (Position position : ACTIONS(state)) {
+            MoveValue minValue = MIN_VALUE(RESULT(state, position));
+            int v2 = minValue.utilityValue();
+            if (v2 > v) {
+                v = v2;
+                move = position;
             }
         }
         return new MoveValue(v, move);
     }
 
     public MoveValue MIN_VALUE(GameState state) {
+        System.out.println("Min Value");
         if (IS_TERMINAL(state)) {
             return new MoveValue(UTILITY(state), null);
+        }
+        ArrayList<Position> actions = ACTIONS(state);
+        if (actions.isEmpty()) {
+            // No moves available, pass the turn to opponent
+            GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
+            passed.changePlayer();
+            return MAX_VALUE(passed);
         }
         int v = Integer.MAX_VALUE;
         Position move = null;
@@ -76,7 +86,7 @@ public class MinimaxABP implements IOthelloAI{
     }
 
     public GameState RESULT(GameState state, Position position){
-        GameState newState = state;
+        GameState newState = new GameState(state.getBoard(), state.getPlayerInTurn());
         if(newState.insertToken(position)){
             return newState;
         } else {
