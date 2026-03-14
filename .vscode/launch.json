@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Othello",
+            "request": "launch",
+            "mainClass": "Othello",
+            "args": ["DumAI", "MinimaxABP"],
+            "cwd": "${workspaceFolder}/src"
+        }
+    ]
+}
