@@ -10,7 +10,7 @@ public class MinimaxABP implements IOthelloAI{
 
     public Position ALPHA_BETA_SEARCH(GameState state){
         System.out.println("Initiating Search");
-        Position position = MAX_VALUE(state, Integer.MAX_VALUE, Integer.MIN_VALUE).move();
+        Position position = MAX_VALUE(state, Integer.MIN_VALUE, Integer.MAX_VALUE).move();
         return position;
     }
 
