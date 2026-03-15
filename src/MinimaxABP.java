@@ -3,6 +3,7 @@ import java.util.*;
 record MoveValue(int utilityValue, Position move) {}
 
 public class MinimaxABP implements IOthelloAI{
+    private int fixedDepth = 4;
 
 	public Position decideMove(GameState state){
 		return ALPHA_BETA_SEARCH(state);
@@ -10,26 +11,35 @@ public class MinimaxABP implements IOthelloAI{
 
     public Position ALPHA_BETA_SEARCH(GameState state){
         System.out.println("Initiating Search");
-        Position position = MAX_VALUE(state, Integer.MIN_VALUE, Integer.MAX_VALUE).move();
+        MoveValue moveValue = MAX_VALUE(state, Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
+        Position position = moveValue.move();
+        System.out.println("Final eval value: " + moveValue.utilityValue());
         return position;
     }
 
-    public MoveValue MAX_VALUE(GameState state, int a, int b) {
+    public MoveValue MAX_VALUE(GameState state, int a, int b, int depth) {
         System.out.println("Max Value");
+        /*
         if (IS_TERMINAL(state)) {
             return new MoveValue(UTILITY(state), null);
+        } */
+
+        if(IS_CUTOFF(state, depth)){
+            System.out.println("Eval value: " + EVAL(state));
+            return new MoveValue(EVAL(state), null);
         }
+
         ArrayList<Position> actions = ACTIONS(state);
         if (actions.isEmpty()) {
             // No moves available, pass the turn to opponent
             GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
             passed.changePlayer();
-            return MIN_VALUE(passed, a, b);
+            return MIN_VALUE(passed, a, b, depth+1);
         }
         int v = Integer.MIN_VALUE;
         Position move = null;
         for (Position position : ACTIONS(state)) {
-            MoveValue minValue = MIN_VALUE(RESULT(state, position), a, b);
+            MoveValue minValue = MIN_VALUE(RESULT(state, position), a, b, depth+1);
             int v2 = minValue.utilityValue();
             if (v2 > v) {
                 v = v2;
@@ -41,22 +51,28 @@ public class MinimaxABP implements IOthelloAI{
         return new MoveValue(v, move);
     }
 
-    public MoveValue MIN_VALUE(GameState state, int a, int b) {
+    public MoveValue MIN_VALUE(GameState state, int a, int b, int depth) {
         System.out.println("Min Value");
+        /*
         if (IS_TERMINAL(state)) {
             return new MoveValue(UTILITY(state), null);
+        } */
+        if(IS_CUTOFF(state, depth)){
+            System.out.println("Eval value: " + EVAL(state));
+            return new MoveValue(EVAL(state), null);
         }
+
         ArrayList<Position> actions = ACTIONS(state);
         if (actions.isEmpty()) {
             // No moves available, pass the turn to opponent
             GameState passed = new GameState(state.getBoard(), state.getPlayerInTurn());
             passed.changePlayer();
-            return MAX_VALUE(passed, a, b);
+            return MAX_VALUE(passed, a, b, depth+1);
         }
         int v = Integer.MAX_VALUE;
         Position move = null;
         for (Position position : ACTIONS(state)) {
-            MoveValue maxValue = MAX_VALUE(RESULT(state, position), a, b);
+            MoveValue maxValue = MAX_VALUE(RESULT(state, position), a, b, depth+1);
             int v2 = maxValue.utilityValue();
             if (v2 < v) {
                 v = v2;
@@ -83,6 +99,22 @@ public class MinimaxABP implements IOthelloAI{
 
     public boolean IS_TERMINAL(GameState state){
         return state.isFinished();
+    }
+
+    public int EVAL(GameState state){
+        int[] playerTokens = state.countTokens();
+
+        if(state.getPlayerInTurn() == 1){
+            return playerTokens[1] - playerTokens[0];
+        }
+        else {
+            return playerTokens[0] - playerTokens[1];
+        }
+    }
+
+    public boolean IS_CUTOFF(GameState state, int depth){
+        if(depth > fixedDepth || IS_TERMINAL(state)) return true;
+        else {return false;}
     }
 
     public ArrayList<Position> ACTIONS(GameState state){
